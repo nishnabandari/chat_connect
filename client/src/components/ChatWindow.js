@@ -5,25 +5,23 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import { IconButton } from "@mui/material";
 
-function ChatWindow({ selectedChat }) {
+function ChatWindow({
+  selectedChat,
+  chats,
+  setChats,
+  unreadChats,
+  setUnreadChats,
+}) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const bottomRef = useRef(null);
+  
 
   // Socket Setup
-  useEffect(() => {
-    socket.emit("setup", currentUser);
+  // Listen for incoming messages
 
-    socket.on("connected", () => {
-      console.log("✅ Socket Connected");
-    });
-
-    return () => {
-      socket.off("connected");
-    };
-  }, []);
 
   // Fetch Messages whenever chat changes
   useEffect(() => {
@@ -33,17 +31,30 @@ function ChatWindow({ selectedChat }) {
   }, [selectedChat]);
 
   // Listen for incoming messages
-  useEffect(() => {
-    socket.on("message received", (message) => {
-      if (selectedChat && message.chat._id === selectedChat._id) {
-        setMessages((prev) => [...prev, message]);
-      }
-    });
+ useEffect(() => {
+  socket.on("message received", (message) => {
+    console.log("Received Socket Message:", message);
 
-    return () => {
-      socket.off("message received");
-    };
-  }, [selectedChat]);
+    // If the chat is open
+    if (selectedChat && message.chat._id === selectedChat._id) {
+      setMessages((prev) => [...prev, message]);
+    } else {
+      // Show notification dot
+      setUnreadChats((prev) => ({
+        ...prev,
+        [message.chat._id]: true,
+      }));
+    }
+
+    // Move chat to top
+    moveChatToTop(message.chat._id);
+
+  });
+
+  return () => {
+    socket.off("message received");
+  };
+}, [selectedChat]);
 
   // Auto Scroll
   useEffect(() => {
@@ -64,10 +75,30 @@ function ChatWindow({ selectedChat }) {
 
       setMessages(res.data.messages);
       socket.emit("join chat", selectedChat._id);
+
+// Clear notification when chat is opened
+setUnreadChats((prev) => {
+  const copy = { ...prev };
+  delete copy[selectedChat._id];
+  return copy;
+});
     } catch (error) {
       console.log(error);
     }
   };
+
+  const moveChatToTop = (chatId) => {
+  setChats((prevChats) => {
+    const chat = prevChats.find((c) => c._id === chatId);
+
+    if (!chat) return prevChats;
+
+    return [
+      chat,
+      ...prevChats.filter((c) => c._id !== chatId),
+    ];
+  });
+};
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -89,6 +120,7 @@ function ChatWindow({ selectedChat }) {
       );
 
       setMessages((prev) => [...prev, res.data.message]);
+      moveChatToTop(selectedChat._id);
       socket.emit("new message", res.data.message);
       setNewMessage("");
     } catch (error) {

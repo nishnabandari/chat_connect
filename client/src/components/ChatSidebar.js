@@ -5,6 +5,7 @@ function ChatSidebar({
   chats,
   selectedChat,
   setSelectedChat,
+  unreadChats,
 }) {
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
@@ -86,17 +87,38 @@ function ChatSidebar({
 
             {/* User Info */}
             <div style={{ flex: 1 }}>
+              {/* Name + Notification Dot */}
               <div
                 style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
-                  color: "#111827",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   marginBottom: "5px",
                 }}
               >
-                {otherUser.name}
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "17px",
+                    color: "#111827",
+                  }}
+                >
+                  {otherUser.name}
+                </span>
+
+                {unreadChats?.[chat._id] && (
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      backgroundColor: "#EF4444",
+                      borderRadius: "50%",
+                    }}
+                  />
+                )}
               </div>
 
+              {/* Email */}
               <div
                 style={{
                   display: "flex",
@@ -110,7 +132,7 @@ function ChatSidebar({
                 {otherUser.email}
               </div>
 
-              {/* Placeholder until we add latest messages */}
+              {/* Placeholder */}
               <div
                 style={{
                   marginTop: "6px",

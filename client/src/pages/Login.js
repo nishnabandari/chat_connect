@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../services/api";
 
 function Login() {
@@ -61,6 +61,25 @@ function Login() {
       <h3>Welcome Back</h3>
 
       <form onSubmit={handleLogin}>
+        
+        <p
+  style={{
+    textAlign: "center",
+    marginTop: "20px",
+  }}
+>
+  Don't have an account?{" "}
+  <Link
+    to="/register"
+    style={{
+      color: "#1976d2",
+      textDecoration: "none",
+      fontWeight: "bold",
+    }}
+  >
+    Register
+  </Link>
+</p>
 
         <input
           type="email"

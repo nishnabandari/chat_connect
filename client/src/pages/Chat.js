@@ -8,6 +8,8 @@ import API from "../services/api";
 function Chat() {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chats, setChats] = useState([]);
+  const [unreadChats, setUnreadChats] = useState({});
+  console.log("Unread Chats State:", unreadChats);
 
   useEffect(() => {
     fetchChats();
@@ -90,7 +92,13 @@ function Chat() {
           overflow: "hidden",
         }}
       >
-        <ChatWindow selectedChat={selectedChat} />
+        <ChatWindow
+  selectedChat={selectedChat}
+  chats={chats}
+  setChats={setChats}
+  unreadChats={unreadChats}
+  setUnreadChats={setUnreadChats}
+/>
       </div>
     </div>
   </div>
